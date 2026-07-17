@@ -16,7 +16,7 @@ class SafebooruSequentialTopTags:
                 "include_series": ("BOOLEAN", {"default": False}),
                 "include_meta": ("BOOLEAN", {"default": False}),
                 "replace_underscores": ("BOOLEAN", {"default": True}),
-                "tag_index": ("INT", {"default": 0, "min": 0, "max": 199}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             }
         }
     
@@ -29,7 +29,7 @@ class SafebooruSequentialTopTags:
     FUNCTION = "fetch_next_tags_and_prepend"
     CATEGORY = "utils"
 
-    def fetch_next_tags_and_prepend(self, base_prompt, safebooru_username, safebooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, tag_index):
+    def fetch_next_tags_and_prepend(self, base_prompt, safebooru_username, safebooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
         if not self.__class__.available_safebooru_post_tags_queue:
             api_endpoint_url = f"https://safebooru.donmai.us/posts.json?limit=200&tags=order:rank"
             if safebooru_username and safebooru_api_key:
@@ -56,7 +56,7 @@ class SafebooruSequentialTopTags:
                 print(f"[Safebooru Node Error] {network_or_parsing_error}")
 
         if self.__class__.available_safebooru_post_tags_queue:
-            safe_index = min(tag_index, len(self.__class__.available_safebooru_post_tags_queue) - 1)
+            safe_index = seed % len(self.__class__.available_safebooru_post_tags_queue)
             post_data = self.__class__.available_safebooru_post_tags_queue[safe_index]
             tags_to_include = []
             
@@ -100,7 +100,7 @@ class SafebooruSequentialTopTags:
             
         console_separator_line = "-" * 50
         print(f"\n{console_separator_line}")
-        print(f"[Safebooru Node] Current Tag Index: {tag_index} / {max(0, len(self.__class__.available_safebooru_post_tags_queue) - 1)}")
+        print(f"[Safebooru Node] Current Tag Index: {seed} (Mod: {seed % max(1, len(self.__class__.available_safebooru_post_tags_queue))}) / {max(0, len(self.__class__.available_safebooru_post_tags_queue) - 1)}")
         print(f"[Safebooru Node] Exact Fetched Tags:\n{current_post_tags[:100]}...") 
         print(f"{console_separator_line}")
             
@@ -116,8 +116,13 @@ class DanbooruSequentialTopTags:
                 "base_prompt": ("STRING", {"multiline": True, "default": ""}),
                 "danbooru_username": ("STRING", {"multiline": False, "default": ""}),
                 "danbooru_api_key": ("STRING", {"multiline": False, "default": ""}),
-                "ignore_character": ("BOOLEAN", {"default": False}),
-                "ignore_series": ("BOOLEAN", {"default": False}),
+                "include_general": ("BOOLEAN", {"default": True}),
+                "include_artist": ("BOOLEAN", {"default": True}),
+                "include_character": ("BOOLEAN", {"default": False}),
+                "include_series": ("BOOLEAN", {"default": False}),
+                "include_meta": ("BOOLEAN", {"default": False}),
+                "replace_underscores": ("BOOLEAN", {"default": True}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             }
         }
     
@@ -130,7 +135,7 @@ class DanbooruSequentialTopTags:
     FUNCTION = "fetch_next_tags_and_prepend"
     CATEGORY = "utils"
 
-    def fetch_next_tags_and_prepend(self, base_prompt, danbooru_username, danbooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, tag_index):
+    def fetch_next_tags_and_prepend(self, base_prompt, danbooru_username, danbooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
         if not self.__class__.available_danbooru_post_tags_queue:
             api_endpoint_url = f"https://danbooru.donmai.us/posts.json?limit=200&tags=order:rank"
             if danbooru_username and danbooru_api_key:
@@ -158,7 +163,7 @@ class DanbooruSequentialTopTags:
                 print(f"[Danbooru Node Error] {network_or_parsing_error}")
 
         if self.__class__.available_danbooru_post_tags_queue:
-            safe_index = min(tag_index, len(self.__class__.available_danbooru_post_tags_queue) - 1)
+            safe_index = seed % len(self.__class__.available_danbooru_post_tags_queue)
             post_data = self.__class__.available_danbooru_post_tags_queue[safe_index]
             tags_to_include = []
             
@@ -202,7 +207,7 @@ class DanbooruSequentialTopTags:
             
         console_separator_line = "-" * 50
         print(f"\n{console_separator_line}")
-        print(f"[Danbooru Node] Current Tag Index: {tag_index} / {max(0, len(self.__class__.available_danbooru_post_tags_queue) - 1)}")
+        print(f"[Danbooru Node] Current Tag Index: {seed} (Mod: {seed % max(1, len(self.__class__.available_danbooru_post_tags_queue))}) / {max(0, len(self.__class__.available_danbooru_post_tags_queue) - 1)}")
         print(f"[Danbooru Node] Exact Fetched Tags:\n{current_post_tags[:100]}...") 
         print(f"{console_separator_line}")
             
