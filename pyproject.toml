@@ -1,0 +1,13 @@
+[project]
+name = "comfyui-safebooruTop"
+description = "Fetch top tags from Safebooru and Danbooru for ComfyUI."
+version = "1.0.0"
+dependencies = ["requests"]
+
+[project.urls]
+Repository = "https://github.com/TZFC/comfyui-safebooruTop"
+
+[tool.comfy]
+PublisherId = "peachyfang"
+DisplayName = "ComfyUI Safebooru Top Tags"
+Icon = ""
