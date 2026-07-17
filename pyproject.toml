@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-safebooruTop"
 description = "Fetch top tags from Safebooru and Danbooru for ComfyUI."
-version = "1.0.0"
+version = "1.0.1"
 dependencies = ["requests"]
 
 [project.urls]
