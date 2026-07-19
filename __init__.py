@@ -10,11 +10,7 @@ class SafebooruSequentialTopTags:
                 "base_prompt": ("STRING", {"multiline": True, "default": ""}),
                 "safebooru_username": ("STRING", {"multiline": False, "default": ""}),
                 "safebooru_api_key": ("STRING", {"multiline": False, "default": ""}),
-                "include_general": ("BOOLEAN", {"default": True}),
-                "include_artist": ("BOOLEAN", {"default": True}),
-                "include_character": ("BOOLEAN", {"default": False}),
-                "include_series": ("BOOLEAN", {"default": False}),
-                "include_meta": ("BOOLEAN", {"default": False}),
+                "categories": ("STRING", {"multiline": False, "default": "general, artist"}),
                 "replace_underscores": ("BOOLEAN", {"default": True}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             }
@@ -29,7 +25,7 @@ class SafebooruSequentialTopTags:
     FUNCTION = "fetch_next_tags_and_prepend"
     CATEGORY = "utils"
 
-    def fetch_next_tags_and_prepend(self, base_prompt, safebooru_username, safebooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
+    def fetch_next_tags_and_prepend(self, base_prompt, safebooru_username, safebooru_api_key, categories, replace_underscores, seed):
         if not self.__class__.available_safebooru_post_tags_queue:
             api_endpoint_url = f"https://safebooru.donmai.us/posts.json?limit=200&tags=order:rank"
             if safebooru_username and safebooru_api_key:
@@ -59,7 +55,13 @@ class SafebooruSequentialTopTags:
             safe_index = seed % len(self.__class__.available_safebooru_post_tags_queue)
             post_data = self.__class__.available_safebooru_post_tags_queue[safe_index]
             tags_to_include = []
-            
+            cats = [c.strip().lower() for c in categories.split(",") if c.strip()]
+            include_series = "copyright" in cats or "series" in cats
+            include_character = "character" in cats or "character_name" in cats
+            include_artist = "artist" in cats
+            include_general = "general" in cats
+            include_meta = "meta" in cats
+
             if include_series:
                 series_tags = post_data.get("tag_string_copyright", "")
                 if series_tags: tags_to_include.append(series_tags)
@@ -116,11 +118,7 @@ class DanbooruSequentialTopTags:
                 "base_prompt": ("STRING", {"multiline": True, "default": ""}),
                 "danbooru_username": ("STRING", {"multiline": False, "default": ""}),
                 "danbooru_api_key": ("STRING", {"multiline": False, "default": ""}),
-                "include_general": ("BOOLEAN", {"default": True}),
-                "include_artist": ("BOOLEAN", {"default": True}),
-                "include_character": ("BOOLEAN", {"default": False}),
-                "include_series": ("BOOLEAN", {"default": False}),
-                "include_meta": ("BOOLEAN", {"default": False}),
+                "categories": ("STRING", {"multiline": False, "default": "general, artist"}),
                 "replace_underscores": ("BOOLEAN", {"default": True}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             }
@@ -135,7 +133,7 @@ class DanbooruSequentialTopTags:
     FUNCTION = "fetch_next_tags_and_prepend"
     CATEGORY = "utils"
 
-    def fetch_next_tags_and_prepend(self, base_prompt, danbooru_username, danbooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
+    def fetch_next_tags_and_prepend(self, base_prompt, danbooru_username, danbooru_api_key, categories, replace_underscores, seed):
         if not self.__class__.available_danbooru_post_tags_queue:
             api_endpoint_url = f"https://danbooru.donmai.us/posts.json?limit=200&tags=order:rank"
             if danbooru_username and danbooru_api_key:
@@ -167,6 +165,13 @@ class DanbooruSequentialTopTags:
             post_data = self.__class__.available_danbooru_post_tags_queue[safe_index]
             tags_to_include = []
             
+            cats = [c.strip().lower() for c in categories.split(",") if c.strip()]
+            include_series = "copyright" in cats or "series" in cats
+            include_character = "character" in cats or "character_name" in cats
+            include_artist = "artist" in cats
+            include_general = "general" in cats
+            include_meta = "meta" in cats
+
             if include_series:
                 series_tags = post_data.get("tag_string_copyright", "")
                 if series_tags: tags_to_include.append(series_tags)
