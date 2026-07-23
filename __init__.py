@@ -30,8 +30,9 @@ class SafebooruSequentialTopTags:
     CATEGORY = "utils"
 
     def fetch_next_tags_and_prepend(self, base_prompt, safebooru_username, safebooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
-        if not self.__class__.available_safebooru_post_tags_queue:
-            api_endpoint_url = f"https://safebooru.donmai.us/posts.json?limit=200&tags=order:rank"
+        while seed >= len(self.__class__.available_safebooru_post_tags_queue):
+            next_page = (len(self.__class__.available_safebooru_post_tags_queue) // 200) + 1
+            api_endpoint_url = f"https://safebooru.donmai.us/posts.json?limit=200&tags=order:rank&page={next_page}"
             if safebooru_username and safebooru_api_key:
                 api_endpoint_url += f"&login={safebooru_username}&api_key={safebooru_api_key}"
             
@@ -49,11 +50,18 @@ class SafebooruSequentialTopTags:
                 api_response.raise_for_status()
                 post_data_list = api_response.json()
                 
+                if not post_data_list:
+                    print("[Safebooru Node] Reached the end of available posts from the API.")
+                    break
+                    
                 for individual_post_data in post_data_list:
                     self.__class__.available_safebooru_post_tags_queue.append(individual_post_data)
+                    
+                print(f"[Safebooru Node] Fetched page {next_page} (Total tags in queue: {len(self.__class__.available_safebooru_post_tags_queue)})")
                         
             except Exception as network_or_parsing_error:
                 print(f"[Safebooru Node Error] {network_or_parsing_error}")
+                break
 
         if self.__class__.available_safebooru_post_tags_queue:
             safe_index = seed % len(self.__class__.available_safebooru_post_tags_queue)
@@ -136,8 +144,9 @@ class DanbooruSequentialTopTags:
     CATEGORY = "utils"
 
     def fetch_next_tags_and_prepend(self, base_prompt, danbooru_username, danbooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
-        if not self.__class__.available_danbooru_post_tags_queue:
-            api_endpoint_url = f"https://danbooru.donmai.us/posts.json?limit=200&tags=order:rank"
+        while seed >= len(self.__class__.available_danbooru_post_tags_queue):
+            next_page = (len(self.__class__.available_danbooru_post_tags_queue) // 200) + 1
+            api_endpoint_url = f"https://danbooru.donmai.us/posts.json?limit=200&tags=order:rank&page={next_page}"
             if danbooru_username and danbooru_api_key:
                 api_endpoint_url += f"&login={danbooru_username}&api_key={danbooru_api_key}"
             
@@ -147,7 +156,6 @@ class DanbooruSequentialTopTags:
             }
             
             try:
-                # Danbooru allows standard requests with a proper User-Agent
                 api_response = requests.get(
                     api_endpoint_url, 
                     headers=http_request_headers, 
@@ -156,11 +164,18 @@ class DanbooruSequentialTopTags:
                 api_response.raise_for_status()
                 post_data_list = api_response.json()
                 
+                if not post_data_list:
+                    print("[Danbooru Node] Reached the end of available posts from the API.")
+                    break
+                    
                 for individual_post_data in post_data_list:
                     self.__class__.available_danbooru_post_tags_queue.append(individual_post_data)
+                    
+                print(f"[Danbooru Node] Fetched page {next_page} (Total tags in queue: {len(self.__class__.available_danbooru_post_tags_queue)})")
                         
             except Exception as network_or_parsing_error:
                 print(f"[Danbooru Node Error] {network_or_parsing_error}")
+                break
 
         if self.__class__.available_danbooru_post_tags_queue:
             safe_index = seed % len(self.__class__.available_danbooru_post_tags_queue)
