@@ -2,6 +2,7 @@ import requests
 
 class SafebooruSequentialTopTags:
     available_safebooru_post_tags_queue = []
+    initial_seed = None
     
     @classmethod
     def INPUT_TYPES(cls):
@@ -30,7 +31,16 @@ class SafebooruSequentialTopTags:
     CATEGORY = "utils"
 
     def fetch_next_tags_and_prepend(self, base_prompt, safebooru_username, safebooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
-        while seed >= len(self.__class__.available_safebooru_post_tags_queue):
+        if self.__class__.initial_seed is None:
+            self.__class__.initial_seed = seed
+            
+        actual_index = abs(seed - self.__class__.initial_seed)
+        
+        # Safeguard against massive random seed jumps to prevent fetching hundreds of pages
+        if actual_index > len(self.__class__.available_safebooru_post_tags_queue) + 200:
+            actual_index = actual_index % max(1, len(self.__class__.available_safebooru_post_tags_queue))
+
+        while actual_index >= len(self.__class__.available_safebooru_post_tags_queue):
             next_page = (len(self.__class__.available_safebooru_post_tags_queue) // 200) + 1
             api_endpoint_url = f"https://safebooru.donmai.us/posts.json?limit=200&tags=order:rank&page={next_page}"
             if safebooru_username and safebooru_api_key:
@@ -64,7 +74,7 @@ class SafebooruSequentialTopTags:
                 break
 
         if self.__class__.available_safebooru_post_tags_queue:
-            safe_index = seed % len(self.__class__.available_safebooru_post_tags_queue)
+            safe_index = actual_index % len(self.__class__.available_safebooru_post_tags_queue)
             post_data = self.__class__.available_safebooru_post_tags_queue[safe_index]
             tags_to_include = []
             
@@ -108,7 +118,7 @@ class SafebooruSequentialTopTags:
             
         console_separator_line = "-" * 50
         print(f"\n{console_separator_line}")
-        print(f"[Safebooru Node] Current Tag Index: {seed} (Mod: {seed % max(1, len(self.__class__.available_safebooru_post_tags_queue))}) / {max(0, len(self.__class__.available_safebooru_post_tags_queue) - 1)}")
+        print(f"[Safebooru Node] Current Tag Index: {actual_index} (Mod: {actual_index % max(1, len(self.__class__.available_safebooru_post_tags_queue))}) / {max(0, len(self.__class__.available_safebooru_post_tags_queue) - 1)}")
         print(f"[Safebooru Node] Exact Fetched Tags:\n{current_post_tags[:100]}...") 
         print(f"{console_separator_line}")
             
@@ -116,6 +126,7 @@ class SafebooruSequentialTopTags:
 
 class DanbooruSequentialTopTags:
     available_danbooru_post_tags_queue = []
+    initial_seed = None
     
     @classmethod
     def INPUT_TYPES(cls):
@@ -144,7 +155,16 @@ class DanbooruSequentialTopTags:
     CATEGORY = "utils"
 
     def fetch_next_tags_and_prepend(self, base_prompt, danbooru_username, danbooru_api_key, include_general, include_artist, include_character, include_series, include_meta, replace_underscores, seed):
-        while seed >= len(self.__class__.available_danbooru_post_tags_queue):
+        if self.__class__.initial_seed is None:
+            self.__class__.initial_seed = seed
+            
+        actual_index = abs(seed - self.__class__.initial_seed)
+        
+        # Safeguard against massive random seed jumps to prevent fetching hundreds of pages
+        if actual_index > len(self.__class__.available_danbooru_post_tags_queue) + 200:
+            actual_index = actual_index % max(1, len(self.__class__.available_danbooru_post_tags_queue))
+
+        while actual_index >= len(self.__class__.available_danbooru_post_tags_queue):
             next_page = (len(self.__class__.available_danbooru_post_tags_queue) // 200) + 1
             api_endpoint_url = f"https://danbooru.donmai.us/posts.json?limit=200&tags=order:rank&page={next_page}"
             if danbooru_username and danbooru_api_key:
@@ -178,7 +198,7 @@ class DanbooruSequentialTopTags:
                 break
 
         if self.__class__.available_danbooru_post_tags_queue:
-            safe_index = seed % len(self.__class__.available_danbooru_post_tags_queue)
+            safe_index = actual_index % len(self.__class__.available_danbooru_post_tags_queue)
             post_data = self.__class__.available_danbooru_post_tags_queue[safe_index]
             tags_to_include = []
             
@@ -222,7 +242,7 @@ class DanbooruSequentialTopTags:
             
         console_separator_line = "-" * 50
         print(f"\n{console_separator_line}")
-        print(f"[Danbooru Node] Current Tag Index: {seed} (Mod: {seed % max(1, len(self.__class__.available_danbooru_post_tags_queue))}) / {max(0, len(self.__class__.available_danbooru_post_tags_queue) - 1)}")
+        print(f"[Danbooru Node] Current Tag Index: {actual_index} (Mod: {actual_index % max(1, len(self.__class__.available_danbooru_post_tags_queue))}) / {max(0, len(self.__class__.available_danbooru_post_tags_queue) - 1)}")
         print(f"[Danbooru Node] Exact Fetched Tags:\n{current_post_tags[:100]}...") 
         print(f"{console_separator_line}")
             
